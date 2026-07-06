@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>B Sculpt — Coming Soon</title>
+<meta name="description" content="B Sculpt — luxury body sculpting clinic in Mt Hawthorn, Perth. Define your shape. Our new website is coming soon." />
+
+<meta property="og:title" content="B Sculpt — Coming Soon" />
+<meta property="og:description" content="Luxury body sculpting in Mt Hawthorn, Perth. Define your shape." />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="Images/hero-poster.jpg" />
+<link rel="icon" href="Images/logo-mark.png" type="image/png" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Yeseva+One&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    --forest: #163126;
+    --gold:   #C8A96A;
+    --ivory:  #F7F4EF;
+    --cream:  #F5EFE3;
+    --nude:   #ECE5DD;
+    --sage:   #B8C4B6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; }
+  html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--forest);
+    color: var(--cream);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ---------- Fixed looping video ---------- */
+  .video-bg, .video-tint {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+  }
+  .video-bg { object-fit: cover; }
+  .video-tint {
+    z-index: -1;
+    background:
+      linear-gradient(180deg, rgba(11,24,18,0.42) 0%, rgba(13,28,21,0.30) 35%, rgba(11,22,17,0.66) 100%);
+  }
+
+  /* ---------- Logo lockup: centered on the video, pins to top on scroll ---------- */
+  .lockup {
+    position: fixed;
+    left: 50%;
+    top: 50vh;
+    transform: translateX(-50%) scale(1);
+    transform-origin: top center;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+    text-align: center;
+    padding: 0 1.5rem;
+    will-change: top, transform;
+  }
+  .lockup__mark {
+    width: 74px;
+    height: auto;
+    filter: drop-shadow(0 2px 16px rgba(0,0,0,0.4));
+  }
+  .lockup__word { line-height: 0; }
+  .lockup__word img {
+    width: clamp(210px, 58vw, 330px);
+    height: auto;
+    filter: drop-shadow(0 2px 14px rgba(0,0,0,0.32));
+  }
+  .tagline {
+    text-transform: uppercase;
+    letter-spacing: 0.42em;
+    font-size: clamp(0.6rem, 2.5vw, 0.82rem);
+    color: var(--cream);
+    text-indent: 0.42em;
+  }
+  .scroll-cue {
+    position: fixed;
+    bottom: 1.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--cream);
+    opacity: 0.8;
+    transition: opacity 0.4s ease;
+  }
+  .scroll-cue span {
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    font-size: 0.6rem;
+    text-indent: 0.3em;
+  }
+  .scroll-cue svg { width: 20px; height: 20px; animation: bob 2s ease-in-out infinite; }
+  @keyframes bob { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(6px);} }
+
+  /* ---------- The card that rolls up over the video ---------- */
+  .card {
+    position: relative;
+    margin: 100vh auto 0;
+    max-width: 620px;
+    width: calc(100% - 2rem);
+    background: rgba(12,26,20,0.86);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(200,169,106,0.28);
+    border-radius: 26px;
+    padding: clamp(2.5rem, 7vw, 4.5rem) clamp(1.5rem, 6vw, 3.5rem) clamp(3rem, 8vw, 5rem);
+    box-shadow: 0 -20px 60px rgba(0,0,0,0.35);
+    text-align: center;
+  }
+  .tail { height: 0; }
+  .card__handle {
+    width: 46px; height: 4px;
+    background: var(--gold);
+    opacity: 0.7;
+    border-radius: 999px;
+    margin: 0 auto 2.5rem;
+  }
+
+  /* sequenced blocks */
+  .step {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+  .step.in { opacity: 1; transform: translateY(0); }
+
+  .headline {
+    font-family: 'Yeseva One', serif;
+    font-weight: 400;
+    color: var(--cream);
+    font-size: clamp(1.6rem, 6vw, 2.4rem);
+    line-height: 1.3;
+    margin-bottom: 2.4rem;
+  }
+  .paragraph {
+    font-weight: 300;
+    color: var(--nude);
+    font-size: clamp(0.98rem, 2.7vw, 1.08rem);
+    line-height: 1.75;
+    max-width: 38ch;
+    margin: 0 auto 2.8rem;
+  }
+
+  /* email capture */
+  .notify { max-width: 430px; margin: 0 auto 2.8rem; }
+  .notify__row { display: flex; gap: 0.5rem; }
+  .notify__input {
+    flex: 1 1 auto; min-width: 0;
+    font-family: 'DM Sans', sans-serif; font-size: 0.95rem;
+    color: var(--cream);
+    background: rgba(247,244,239,0.06);
+    border: 1px solid rgba(200,169,106,0.55);
+    border-radius: 999px;
+    padding: 0.85rem 1.25rem; outline: none;
+    transition: border-color .25s ease, background .25s ease;
+  }
+  .notify__input::placeholder { color: rgba(245,239,227,0.55); }
+  .notify__input:focus { border-color: var(--gold); background: rgba(247,244,239,0.10); }
+  .notify__btn {
+    flex: 0 0 auto;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 0.9rem;
+    color: var(--forest); background: var(--gold);
+    border: 1px solid var(--gold); border-radius: 999px;
+    padding: 0.85rem 1.4rem; cursor: pointer; white-space: nowrap;
+    transition: transform .25s ease, box-shadow .25s ease, background .25s ease;
+  }
+  .notify__btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); background: #d4b878; }
+  .notify__btn:active { transform: translateY(0); }
+  .notify__msg { font-size: 0.85rem; color: var(--gold); margin-top: 0.85rem; min-height: 1.1em; }
+
+  /* contact */
+  .contact {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 0.6rem 1.3rem; margin-bottom: 2rem; font-size: 0.9rem;
+  }
+  .contact a {
+    color: var(--cream); text-decoration: none;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    letter-spacing: 0.02em; transition: color .2s ease;
+  }
+  .contact a:hover { color: var(--gold); }
+  .contact svg { width: 17px; height: 17px; fill: currentColor; }
+  .location {
+    text-transform: uppercase; letter-spacing: 0.34em;
+    font-size: 0.66rem; color: var(--sage); text-indent: 0.34em;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .step { opacity: 1 !important; transform: none !important; transition: none !important; }
+    .scroll-cue svg { animation: none; }
+  }
+  @media (max-width: 430px) {
+    .notify__row { flex-direction: column; }
+    .notify__btn { width: 100%; }
+  }
+</style>
+</head>
+<body>
+  <!-- Looping hero video (self-hosted). Poster is the video's own first frame. -->
+  <video class="video-bg" autoplay loop muted playsinline poster="Images/hero-poster.jpg"
+         preload="auto" aria-hidden="true">
+    <source src="Images/body-video.mp4" type="video/mp4" />
+  </video>
+  <div class="video-tint"></div>
+
+  <!-- 1) Logo lockup: centered on the video, then pins to the top on scroll -->
+  <div class="lockup" id="lockup">
+    <img class="lockup__mark" src="Images/logo-mark.png" alt="" aria-hidden="true" />
+    <h1 class="lockup__word"><img src="Images/wordmark.png" alt="B Sculpt" /></h1>
+    <p class="tagline">Define Your Shape</p>
+  </div>
+  <div class="scroll-cue" id="cue" aria-hidden="true">
+    <span>Scroll</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+  </div>
+
+  <!-- 2) Card rolls up; text reveals in sequence -->
+  <main class="card">
+    <div class="card__handle"></div>
+
+    <h2 class="headline step">Something beautiful is on its way</h2>
+
+    <p class="paragraph step">
+      Our new home is coming soon. Leave your email and we'll let you know the moment we open the doors.
+    </p>
+
+    <!-- ===================== EMAIL CAPTURE ===================== -->
+    <form class="notify step" id="notifyForm" novalidate>
+      <div class="notify__row">
+        <input class="notify__input" id="notifyEmail" type="email" name="email"
+               placeholder="Your email address" autocomplete="email" required
+               aria-label="Your email address" />
+        <button class="notify__btn" type="submit">Notify me</button>
+      </div>
+      <p class="notify__msg" id="notifyMsg" role="status" aria-live="polite"></p>
+    </form>
+    <!-- ========================================================= -->
+
+    <nav class="contact step" aria-label="Contact">
+      <a href="https://instagram.com/bsculptperth" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.7 3.7 0 0 1-1.38-.9 3.7 3.7 0 0 1-.9-1.38c-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16Zm0 1.62c-3.15 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.6-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.6.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.6.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.6-.07-4.74-.07Zm0 2.76a5.3 5.3 0 1 1 0 10.6 5.3 5.3 0 0 1 0-10.6Zm0 8.74a3.44 3.44 0 1 0 0-6.88 3.44 3.44 0 0 0 0 6.88Zm6.74-8.94a1.24 1.24 0 1 1-2.48 0 1.24 1.24 0 0 1 2.48 0Z"/></svg>
+        Instagram
+      </a>
+      <a href="https://www.facebook.com/profile.php?id=61590330127250" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.9h2.54V9.85c0-2.52 1.5-3.91 3.78-3.91 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.78-1.63 1.57v1.88h2.78l-.44 2.9h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94Z"/></svg>
+        Facebook
+      </a>
+      <a href="mailto:info@bsculpt.com.au">info@bsculpt.com.au</a>
+      <a href="mailto:bookings@bsculpt.com.au">bookings@bsculpt.com.au</a>
+    </nav>
+
+    <p class="location step">Mt Hawthorn · Perth</p>
+  </main>
+  <div class="tail" id="tail" aria-hidden="true"></div>
+
+<script>
+  // Logo lockup scrolls up 1:1 with the page, then pins at the top; the card keeps rising underneath
+  var lockup = document.getElementById('lockup');
+  var cue = document.getElementById('cue');
+  var card = document.querySelector('.card');
+  var tail = document.getElementById('tail');
+  var startTop, span, endTop = 24;
+  var PINNED_SCALE = 0.84;   // must match the min scale used in onScroll()
+
+  function layout() {
+    var vh = window.innerHeight;
+    var h = lockup.offsetHeight;
+    startTop = Math.max((vh - h) / 2, endTop);
+    span = Math.max(startTop - endTop, 1);
+
+    // Frame the card below the pinned logo with equal space above and below,
+    // and cap the scroll so it stops there instead of riding over the logo.
+    var logoBottom = endTop + h * PINNED_SCALE;
+    var cardH = card.offsetHeight;
+    var avail = vh - logoBottom;
+    var minGap = 20;
+    if (cardH + 2 * minGap <= avail) {
+      var gap = (avail - cardH) / 2;
+      card.style.position = 'sticky';
+      card.style.top = restRound(logoBottom + gap) + 'px';
+      tail.style.height = restRound(gap) + 'px';
+    } else {
+      // Card is taller than the space (small screens): let it scroll normally.
+      card.style.position = 'static';
+      card.style.top = 'auto';
+      tail.style.height = Math.round(vh * 0.1) + 'px';
+    }
+    onScroll();
+  }
+  function restRound(n) { return Math.max(0, Math.round(n)); }
+  function onScroll() {
+    var y = window.scrollY || window.pageYOffset;
+    var top = Math.max(endTop, startTop - y);
+    var progress = (startTop - top) / span;        // 0 = centered, 1 = pinned
+    var scale = 1 - 0.16 * progress;               // gentle shrink into a header
+    lockup.style.top = top + 'px';
+    lockup.style.transform = 'translateX(-50%) scale(' + scale.toFixed(3) + ')';
+    if (cue) cue.style.opacity = String(Math.max(0, 1 - y / (window.innerHeight * 0.3)));
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', layout);
+  window.addEventListener('load', layout);
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(layout); }
+  layout();
+
+  // Sequenced reveal: each .step fades up as it scrolls into view (statement → paragraph → notify → links → location)
+  var steps = document.querySelectorAll('.step');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+  steps.forEach(function (s) { io.observe(s); });
+
+  // Failsafe: once you reach the bottom, make sure every remaining block is shown
+  window.addEventListener('scroll', function () {
+    if (window.innerHeight + (window.scrollY || window.pageYOffset) >= document.body.scrollHeight - 6) {
+      steps.forEach(function (s) { s.classList.add('in'); });
+    }
+  }, { passive: true });
+
+  // ===================== EMAIL CAPTURE HANDLER =====================
+  (function () {
+    var form = document.getElementById('notifyForm');
+    var input = document.getElementById('notifyEmail');
+    var msg = document.getElementById('notifyMsg');
+    var valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = input.value.trim();
+      if (!valid.test(email)) {
+        msg.style.color = '#e6c98a';
+       
