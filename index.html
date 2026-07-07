@@ -275,7 +275,7 @@
   var cue = document.getElementById('cue');
   var card = document.querySelector('.card');
   var tail = document.getElementById('tail');
-  var startTop, span, endTop = 24;
+  var startTop, span, endTop = 24, pinFits = true;
   var PINNED_SCALE = 0.84;   // must match the min scale used in onScroll()
 
   function layout() {
@@ -292,25 +292,34 @@
     var minGap = 20;
     if (cardH + 2 * minGap <= avail) {
       var gap = (avail - cardH) / 2;
+      pinFits = true;
+      lockup.style.position = 'fixed';
       card.style.position = 'sticky';
       card.style.top = restRound(logoBottom + gap) + 'px';
       tail.style.height = restRound(gap) + 'px';
     } else {
-      // Card is taller than the space (small screens): let it scroll normally.
+      // Phones: card is taller than the space, so unpin the logo and let it
+      // scroll away with the page — the card can never ride up over it.
+      pinFits = false;
+      lockup.style.position = 'absolute';
+      lockup.style.top = restRound(startTop) + 'px';
+      lockup.style.transform = 'translateX(-50%) scale(1)';
       card.style.position = 'static';
       card.style.top = 'auto';
-      tail.style.height = Math.round(vh * 0.1) + 'px';
+      tail.style.height = '0px';
     }
     onScroll();
   }
   function restRound(n) { return Math.max(0, Math.round(n)); }
   function onScroll() {
     var y = window.scrollY || window.pageYOffset;
-    var top = Math.max(endTop, startTop - y);
-    var progress = (startTop - top) / span;        // 0 = centered, 1 = pinned
-    var scale = 1 - 0.16 * progress;               // gentle shrink into a header
-    lockup.style.top = top + 'px';
-    lockup.style.transform = 'translateX(-50%) scale(' + scale.toFixed(3) + ')';
+    if (pinFits) {
+      var top = Math.max(endTop, startTop - y);
+      var progress = (startTop - top) / span;      // 0 = centered, 1 = pinned
+      var scale = 1 - 0.16 * progress;             // gentle shrink into a header
+      lockup.style.top = top + 'px';
+      lockup.style.transform = 'translateX(-50%) scale(' + scale.toFixed(3) + ')';
+    }
     if (cue) cue.style.opacity = String(Math.max(0, 1 - y / (window.innerHeight * 0.3)));
   }
   window.addEventListener('scroll', onScroll, { passive: true });
