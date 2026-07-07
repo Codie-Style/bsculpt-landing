@@ -348,4 +348,43 @@
       var email = input.value.trim();
       if (!valid.test(email)) {
         msg.style.color = '#e6c98a';
-       
+        msg.textContent = 'Please enter a valid email address.';
+        input.focus();
+        return;
+      }
+
+      // -------------------------------------------------------------
+      // ACTIVATE DB: uncomment to write leads into Supabase.
+      // Insert-only RLS policy on `leads` for the `anon` role.
+      //
+      // var SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
+      // var SUPABASE_ANON_KEY = 'YOUR-PUBLIC-ANON-KEY';
+      // fetch(SUPABASE_URL + '/rest/v1/leads', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //     'apikey': SUPABASE_ANON_KEY,
+      //     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+      //     'Prefer': 'return=minimal'
+      //   },
+      //   body: JSON.stringify({ email: email, source: 'coming_soon' })
+      // }).then(function (r) { if (!r.ok) throw new Error(); showThanks(); })
+      //   .catch(function () {
+      //     window.location.href = 'mailto:info@bsculpt.com.au?subject=Notify%20me%20at%20launch&body=' + encodeURIComponent(email);
+      //   });
+      // return;
+      // -------------------------------------------------------------
+
+      showThanks();
+    });
+
+    function showThanks() {
+      form.reset();
+      msg.style.color = '#C8A96A';
+      msg.textContent = 'Thank you — we’ll be in touch the moment we launch.';
+    }
+  })();
+  // ================================================================
+</script>
+</body>
+</html>
