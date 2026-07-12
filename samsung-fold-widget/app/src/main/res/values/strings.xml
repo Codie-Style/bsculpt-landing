@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Fold Clock Widget</string>
-    <string name="widget_label">Fold Clock</string>
-    <string name="widget_description">A clock widget that adapts its layout between the Fold\'s cover screen and its unfolded inner screen.</string>
+    <string name="app_name">Fold Calendar Widget</string>
+    <string name="widget_label">Fold Calendar</string>
+    <string name="widget_description">Shows your upcoming Microsoft 365 / Outlook calendar appointments, adapting between the Fold\'s cover screen and its unfolded screen.</string>
     <string name="widget_loading">Loading…</string>
-    <string name="main_activity_title">Fold Clock Widget</string>
-    <string name="main_activity_body">Long-press an empty spot on your home screen, tap Widgets, find “Fold Clock”, and drag it onto your home screen.\n\nOn the cover screen it shows a compact time-only view. Unfold your phone (or resize the widget wider) to reveal the full date and greeting layout.</string>
+    <string name="widget_not_signed_in">Tap to sign in with Microsoft</string>
+    <string name="widget_no_appointments">No upcoming appointments</string>
+    <string name="widget_upcoming_header">Upcoming</string>
+
+    <string name="main_activity_title">Fold Calendar Widget</string>
+    <string name="main_activity_body">Sign in with the Microsoft account behind your Outlook / OneDrive calendar, then add the “Fold Calendar” widget to your home screen: long-press an empty spot → Widgets → Fold Calendar.\n\nOn the cover screen it shows your next appointment. Unfold your phone (or resize the widget wider) to see the full upcoming list.</string>
+    <string name="sign_in_button">Sign in with Microsoft</string>
+    <string name="sign_out_button">Sign out</string>
+    <string name="status_signed_in">Signed in as %1$s</string>
+    <string name="status_signed_out">Not signed in</string>
+    <string name="status_sign_in_error">Sign-in failed: %1$s</string>
 </resources>

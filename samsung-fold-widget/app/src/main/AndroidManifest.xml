@@ -1,25 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
-        android:theme="@style/Theme.FoldClockWidget">
+        android:theme="@style/Theme.FoldCalendarWidget">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.FoldClockWidget">
+            android:theme="@style/Theme.FoldCalendarWidget">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- Captures the browser redirect once sign-in completes. The path
+             segment must match the signature-hash redirect URI registered
+             in Azure and in res/raw/auth_config_single_account.json. -->
+        <activity
+            android:name="com.microsoft.identity.client.BrowserTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="msauth"
+                    android:host="${applicationId}"
+                    android:path="/PLACEHOLDER_SIGNATURE_HASH" />
+            </intent-filter>
+        </activity>
+
         <receiver
-            android:name=".FoldClockWidgetReceiver"
+            android:name=".FoldCalendarWidgetReceiver"
             android:exported="false"
             android:label="@string/widget_label">
             <intent-filter>
@@ -27,12 +47,8 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/fold_clock_widget_info" />
+                android:resource="@xml/fold_calendar_widget_info" />
         </receiver>
-
-        <receiver
-            android:name=".WidgetTickReceiver"
-            android:exported="false" />
 
     </application>
 

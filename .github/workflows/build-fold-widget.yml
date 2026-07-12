@@ -1,4 +1,4 @@
-name: Build Fold Clock Widget APK
+name: Build Fold Calendar Widget APK
 
 on:
   push:
@@ -35,5 +35,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: fold-clock-widget-debug
+          name: fold-calendar-widget-debug
           path: samsung-fold-widget/app/build/outputs/apk/debug/app-debug.apk
