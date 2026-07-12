@@ -5,6 +5,7 @@ import android.content.Context
 import com.microsoft.identity.client.AuthenticationCallback
 import com.microsoft.identity.client.IAccount
 import com.microsoft.identity.client.IAuthenticationResult
+import com.microsoft.identity.client.IPublicClientApplication
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication
 import com.microsoft.identity.client.PublicClientApplication
 import com.microsoft.identity.client.SilentAuthenticationCallback
@@ -31,7 +32,7 @@ class MsalAuthManager private constructor(context: Context) {
             PublicClientApplication.createSingleAccountPublicClientApplication(
                 appContext,
                 R.raw.auth_config_single_account,
-                object : PublicClientApplication.ISingleAccountApplicationCreatedListener {
+                object : IPublicClientApplication.ISingleAccountApplicationCreatedListener {
                     override fun onCreated(application: ISingleAccountPublicClientApplication) {
                         client = application
                         continuation.resume(application)

@@ -97,7 +97,7 @@ private fun CalendarContent(isUnfolded: Boolean, signedIn: Boolean, appointments
     val clickAction = if (signedIn) {
         actionStartActivity(Intent(Intent.ACTION_VIEW, Uri.parse(OUTLOOK_CALENDAR_URL)))
     } else {
-        actionStartActivity<MainActivity>()
+        actionStartActivity(Intent(context, MainActivity::class.java))
     }
 
     Column(
