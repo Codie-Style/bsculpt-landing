@@ -44,7 +44,7 @@ val LastErrorKey = stringPreferencesKey("last_error")
 private val CoverSize = DpSize(140.dp, 90.dp)
 private val UnfoldedSize = DpSize(420.dp, 260.dp)
 
-private val Forest = ColorProvider(Color(0xFF163126))
+private val Forest = ColorProvider(Color(0xCC163126)) // ~80% opaque, lets wallpaper show through
 private val Gold = ColorProvider(Color(0xFFC8A96A))
 private val Cream = ColorProvider(Color(0xFFF5EFE3))
 private val Sage = ColorProvider(Color(0xFFB8C4B6))
