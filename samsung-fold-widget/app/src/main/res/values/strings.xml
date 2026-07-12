@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fold Clock Widget</string>
+    <string name="widget_label">Fold Clock</string>
+    <string name="widget_description">A clock widget that adapts its layout between the Fold\'s cover screen and its unfolded inner screen.</string>
+    <string name="widget_loading">Loading…</string>
+    <string name="main_activity_title">Fold Clock Widget</string>
+    <string name="main_activity_body">Long-press an empty spot on your home screen, tap Widgets, find “Fold Clock”, and drag it onto your home screen.\n\nOn the cover screen it shows a compact time-only view. Unfold your phone (or resize the widget wider) to reveal the full date and greeting layout.</string>
+</resources>
