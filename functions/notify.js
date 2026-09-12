@@ -45,7 +45,7 @@ export async function onRequestPost(context) {
       from: "B Sculpt <notify@bsculpt.com.au>",
       to: [email],
       subject: "Thanks for your interest — B Sculpt",
-      text: `Thank you for your interest in B Sculpt.\n\nWe'll be in touch the moment we open our doors.\n\nB Sculpt\nOsborne Park, Perth`,
+      text: `Thank you for your interest in B Sculpt.\n\nWe'll be in touch the moment we open our doors.\n\nWarm regards,\nSonya @ B Sculpt\n158 Osborne Park, Perth`,
     });
 
     return new Response(JSON.stringify({ ok: true }), { status: 200 });
