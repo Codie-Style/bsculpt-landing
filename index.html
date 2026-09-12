@@ -36,7 +36,6 @@
     overflow-x: hidden;
   }
 
-  /* ---------- Fixed looping video ---------- */
   .video-bg, .video-tint {
     position: fixed;
     inset: 0;
@@ -51,7 +50,6 @@
       linear-gradient(180deg, rgba(11,24,18,0.42) 0%, rgba(13,28,21,0.30) 35%, rgba(11,22,17,0.66) 100%);
   }
 
-  /* ---------- Logo lockup: centered on the video, pins to top on scroll ---------- */
   .lockup {
     position: fixed;
     left: 50%;
@@ -108,7 +106,6 @@
   .scroll-cue svg { width: 20px; height: 20px; animation: bob 2s ease-in-out infinite; }
   @keyframes bob { 0%,100%{ transform: translateY(0);} 50%{ transform: translateY(6px);} }
 
-  /* ---------- The card that rolls up over the video ---------- */
   .card {
     position: relative;
     margin: 100vh auto 0;
@@ -120,7 +117,6 @@
     border: 1px solid rgba(200,169,106,0.28);
     border-radius: 26px;
     padding: 2.5rem 2rem 3rem;
-    /*padding: clamp(2.5rem, 7vw, 4.5rem) clamp(1.5rem, 6vw, 3.5rem) clamp(3rem, 8vw, 5rem);*/
     box-shadow: 0 -20px 60px rgba(0,0,0,0.35);
     text-align: center;
   }
@@ -133,7 +129,6 @@
     margin: 0 auto 2.5rem;
   }
 
-  /* sequenced blocks */
   .step {
     opacity: 0;
     transform: translateY(28px);
@@ -158,7 +153,6 @@
     margin: 0 auto 2.8rem;
   }
 
-  /* email capture */
   .notify { max-width: 430px; margin: 0 auto 2.8rem; }
   .notify__row { display: flex; gap: 0.5rem; }
   .notify__input {
@@ -185,7 +179,6 @@
   .notify__btn:active { transform: translateY(0); }
   .notify__msg { font-size: 0.85rem; color: var(--gold); margin-top: 0.85rem; min-height: 1.1em; }
 
-  /* contact */
   .contact {
     display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
     gap: 0.6rem 1.3rem; margin-bottom: 2rem; font-size: 0.9rem;
@@ -214,14 +207,12 @@
 </style>
 </head>
 <body>
-  <!-- Looping hero video (self-hosted). Poster is the video's own first frame. Adam-->
   <video class="video-bg" autoplay loop muted playsinline poster="Images/hero-poster.jpg"
          preload="auto" aria-hidden="true">
     <source src="Images/body-video.mp4" type="video/mp4" />
   </video>
   <div class="video-tint"></div>
 
-  <!-- 1) Logo lockup: centered on the video, then pins to the top on scroll -->
   <div class="lockup" id="lockup">
     <img class="lockup__mark" src="Images/logo-mark.png" alt="" aria-hidden="true" />
     <h1 class="lockup__word"><img src="Images/wordmark.png" alt="B Sculpt" /></h1>
@@ -232,7 +223,6 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
   </div>
 
-  <!-- 2) Card rolls up; text reveals in sequence -->
   <main class="card">
     <div class="card__handle"></div>
 
@@ -242,7 +232,6 @@
       Our new home is opening this week. Leave your email and we'll let you know the moment we open the doors.
     </p>
 
-    <!-- ===================== EMAIL CAPTURE ===================== -->
     <form class="notify step" id="notifyForm" novalidate>
       <div class="notify__row">
         <input class="notify__input" id="notifyEmail" type="email" name="email"
@@ -252,7 +241,6 @@
       </div>
       <p class="notify__msg" id="notifyMsg" role="status" aria-live="polite"></p>
     </form>
-    <!-- ========================================================= -->
 
     <nav class="contact step" aria-label="Contact">
       <a href="https://instagram.com/bsculptperth" target="_blank" rel="noopener">
@@ -271,13 +259,12 @@
   <div class="tail" id="tail" aria-hidden="true"></div>
 
 <script>
-  // Logo lockup scrolls up 1:1 with the page, then pins at the top; the card keeps rising underneath
   var lockup = document.getElementById('lockup');
   var cue = document.getElementById('cue');
   var card = document.querySelector('.card');
   var tail = document.getElementById('tail');
   var startTop, span, endTop = 24, pinFits = true;
-  var PINNED_SCALE = 0.84;   // must match the min scale used in onScroll()
+  var PINNED_SCALE = 0.84;
 
   function layout() {
     var vh = window.innerHeight;
@@ -285,8 +272,6 @@
     startTop = Math.max((vh - h) / 2, endTop);
     span = Math.max(startTop - endTop, 1);
 
-    // Frame the card below the pinned logo with equal space above and below,
-    // and cap the scroll so it stops there instead of riding over the logo.
     var logoBottom = endTop + h * PINNED_SCALE;
     var cardH = card.offsetHeight;
     var avail = vh - logoBottom;
@@ -299,8 +284,6 @@
       card.style.top = restRound(logoBottom + gap) + 'px';
       tail.style.height = restRound(gap) + 'px';
     } else {
-      // Phones: card is taller than the space, so unpin the logo and let it
-      // scroll away with the page — the card can never ride up over it.
       pinFits = false;
       lockup.style.position = 'absolute';
       lockup.style.top = restRound(startTop) + 'px';
@@ -316,8 +299,8 @@
     var y = window.scrollY || window.pageYOffset;
     if (pinFits) {
       var top = Math.max(endTop, startTop - y);
-      var progress = (startTop - top) / span;      // 0 = centered, 1 = pinned
-      var scale = 1 - 0.16 * progress;             // gentle shrink into a header
+      var progress = (startTop - top) / span;
+      var scale = 1 - 0.16 * progress;
       lockup.style.top = top + 'px';
       lockup.style.transform = 'translateX(-50%) scale(' + scale.toFixed(3) + ')';
     }
@@ -329,7 +312,6 @@
   if (document.fonts && document.fonts.ready) { document.fonts.ready.then(layout); }
   layout();
 
-  // Sequenced reveal: each .step fades up as it scrolls into view (statement → paragraph → notify → links → location)
   var steps = document.querySelectorAll('.step');
   var io = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
@@ -338,14 +320,12 @@
   }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
   steps.forEach(function (s) { io.observe(s); });
 
-  // Failsafe: once you reach the bottom, make sure every remaining block is shown
   window.addEventListener('scroll', function () {
     if (window.innerHeight + (window.scrollY || window.pageYOffset) >= document.body.scrollHeight - 6) {
       steps.forEach(function (s) { s.classList.add('in'); });
     }
   }, { passive: true });
 
-  // ===================== EMAIL CAPTURE HANDLER =====================
   (function () {
     var form = document.getElementById('notifyForm');
     var input = document.getElementById('notifyEmail');
@@ -362,29 +342,16 @@
         return;
       }
 
-      // -------------------------------------------------------------
-      // ACTIVATE DB: uncomment to write leads into Supabase.
-      // Insert-only RLS policy on `leads` for the `anon` role.
-      //
-      // var SUPABASE_URL = 'https://YOUR-PROJECT.supabase.co';
-      // var SUPABASE_ANON_KEY = 'YOUR-PUBLIC-ANON-KEY';
-      // fetch(SUPABASE_URL + '/rest/v1/leads', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //     'apikey': SUPABASE_ANON_KEY,
-      //     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
-      //     'Prefer': 'return=minimal'
-      //   },
-      //   body: JSON.stringify({ email: email, source: 'coming_soon' })
-      // }).then(function (r) { if (!r.ok) throw new Error(); showThanks(); })
-      //   .catch(function () {
-      //     window.location.href = 'mailto:info@bsculpt.com.au?subject=Notify%20me%20at%20launch&body=' + encodeURIComponent(email);
-      //   });
-      // return;
-      // -------------------------------------------------------------
-
-      showThanks();
+      fetch('/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      })
+        .then(function (r) { if (!r.ok) throw new Error(); showThanks(); })
+        .catch(function () {
+          msg.style.color = '#e6c98a';
+          msg.textContent = 'Something went wrong — please email us directly.';
+        });
     });
 
     function showThanks() {
@@ -393,7 +360,6 @@
       msg.textContent = 'Thank you — we’ll be in touch the moment we launch.';
     }
   })();
-  // ================================================================
 </script>
 </body>
 </html>
