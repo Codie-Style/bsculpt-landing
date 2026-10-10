@@ -1032,7 +1032,13 @@
     cellEls = [].slice.call(skin.querySelectorAll('.cell'));
     deepUpdate(true);
   }
-  document.querySelectorAll('.switch button').forEach(function (b) { b.addEventListener('click', function () { setTreatment(b.dataset.t); }); });
+  // v21: switching treatment restarts the deep dive from the top and replays the equipment drawing
+  document.querySelectorAll('.switch button').forEach(function (b) { b.addEventListener('click', function () {
+    if (b.dataset.t === current) return;
+    setTreatment(b.dataset.t);
+    eqT0 = null; eqPaint(0);
+    scrollToDeep();
+  }); });
 
   var deep = $('deep'), lastP = -1;
   /* v19: timed equipment reveal */
