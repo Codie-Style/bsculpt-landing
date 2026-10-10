@@ -256,7 +256,7 @@
   .machine .ln { stroke-width: 1.3; }
   .machine .ln.soft { stroke-width: .8; stroke-opacity: .7; }
   .act { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); opacity: 0; pointer-events: none; transition: opacity .8s var(--ease); }
-  .act.show { opacity: 1; transition: opacity 1.5s var(--ease); }
+  .act.show { opacity: 1; transition: opacity 1.5s var(--ease) .6s; }  /* v22: waits for the cross-section to fade out */
   @media (prefers-reduced-motion: reduce) { .act, .act.show { transition: none; } }
   .act video { display: none;
   }
@@ -313,7 +313,22 @@
   dialog.contact[open] { animation: riskIn .5s var(--ease); }
   dialog.contact::backdrop { background: rgba(10,22,17,.7); backdrop-filter: blur(4px); }
   .contact__handle { width: 46px; height: 4px; border-radius: 999px; background: var(--bs-gold); opacity: .8; margin: 0 auto 2rem; }
-  @media (max-width: 520px) { dialog.contact { padding: 48px 20px 28px; } .contact__handle { margin-bottom: 1.4rem; } .contact h2 { margin-bottom: .8rem; } .contact p { margin-bottom: 1.4rem; } }
+  @media (max-width: 520px) {   /* v22: tighter so the whole card fits a phone screen */
+    dialog.contact { padding: 30px 18px 20px; border-radius: 22px; }
+    dialog.contact .contact__x { top: 12px; right: 12px; width: 34px; height: 34px; }
+    dialog.contact .contact__handle { margin-bottom: 1rem; }
+    dialog.contact h2 { font-size: 1.75rem; margin-bottom: .5rem; }
+    dialog.contact > p { font-size: .9rem; line-height: 1.55; margin-bottom: 1rem; }
+    dialog.contact .cform { gap: 8px; margin-bottom: 1rem; }
+    dialog.contact .cform input, dialog.contact .cform textarea { padding: .62rem .9rem; font-size: .92rem; border-radius: 12px; }
+    dialog.contact .cform textarea { min-height: 66px; }
+    dialog.contact .cform button { padding: .6rem 1.6rem; margin-top: 2px; }
+    dialog.contact .cform__msg:empty { min-height: 0; }
+    dialog.contact .contact__links { gap: 8px 14px; margin-bottom: .9rem; flex-wrap: nowrap; }
+    dialog.contact .contact__links a { font-size: .84rem; gap: 5px; white-space: nowrap; }
+    dialog.contact .contact__links svg { width: 15px; height: 15px; }
+    dialog.contact .contact__addr { font-size: .58rem; letter-spacing: .26em; line-height: 1.7; }
+  }
   .contact h2 { font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.15; margin-bottom: 1.2rem; }
   .contact p { color: var(--bs-stone); line-height: 1.75; max-width: 40ch; margin: 0 auto 2rem; }
   .contact__links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 22px; margin-bottom: 2.2rem; }
@@ -329,7 +344,6 @@
   .cform input::placeholder, .cform textarea::placeholder { color: rgba(236,229,221,.55); }
   .cform input:focus, .cform textarea:focus { border-color: var(--bs-gold); background: rgba(255,255,255,.07); }
   .cform .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-  .cform__hint { font-size: .72rem !important; line-height: 1.4 !important; color: var(--bs-sage) !important; margin: -4px 0 0 !important; max-width: none !important; }
   .cform__consent { font-size: .72rem !important; line-height: 1.5 !important; color: var(--bs-sage) !important; margin: 0 !important; max-width: none !important; }
   .cform__consent a { color: var(--bs-gold); }
   .cform button { justify-self: center; margin-top: 4px; }
@@ -565,7 +579,6 @@
     <input type="email" name="email" placeholder="Email address" autocomplete="email" aria-label="Email address" required maxlength="200">
     <input type="tel" name="phone" placeholder="Phone (optional)" autocomplete="tel" aria-label="Phone (optional)" maxlength="40">
     <textarea name="message" placeholder="How can we help?" aria-label="Message" required maxlength="3000"></textarea>
-    <p class="cform__hint">Please don't include medical details, we'll cover those at your consultation.</p>
     <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
     <p class="cform__consent">By sending, you agree to us contacting you about your enquiry. See our <a href="/privacy/" target="_blank" rel="noopener">Privacy Policy</a>.</p>
     <button class="pill" type="submit">Send</button>
@@ -996,6 +1009,16 @@
   }
 
   var act = $('act'), actVids = { rf: $('actVid'), cryo: $('actVidC') }, actOn = false, actPauseT = 0;
+  /* v22: time-based handover between cross-section and clip, and timed cryo cooling */
+  var actOnAt = -1e9, actOffAt = -1e9, csT0 = null, animUntil = 0, animRaf = 0;
+  var SKIN_OUT = 0.6, CLIP_OUT = 0.8, CS_HOLD = 1.5, CS_RUN = 3.0;
+  function animFor(sec) {
+    animUntil = Math.max(animUntil, performance.now() + sec * 1000);
+    if (!animRaf) animRaf = requestAnimationFrame(function f() {
+      deepUpdate(true);
+      animRaf = performance.now() < animUntil ? requestAnimationFrame(f) : 0;
+    });
+  }
   var stage = $('stage'), copy = $('copy'), machine = $('machine'), skin = $('skin'), callWrap = $('callouts'), wk = $('wk'), prog = $('prog');
   var current = null, stepEls = [], calloutEls = [], appEls = [], lnEls = [], cellEls = [];
 
@@ -1036,7 +1059,7 @@
   document.querySelectorAll('.switch button').forEach(function (b) { b.addEventListener('click', function () {
     if (b.dataset.t === current) return;
     setTreatment(b.dataset.t);
-    eqT0 = null; eqPaint(0);
+    eqT0 = null; eqPaint(0); csT0 = null;
     scrollToDeep();
   }); });
 
@@ -1100,6 +1123,8 @@
     var inAct = p >= .58 && p < .74;
     if (inAct !== actOn || act.dataset.t !== current) {
       var was = actOn; actOn = inAct; act.dataset.t = current;
+      if (inAct) actOnAt = performance.now(); else if (was) actOffAt = performance.now();
+      animFor(SKIN_OUT + CLIP_OUT + 0.2);
       act.classList.toggle('show', inAct);
       clearTimeout(actPauseT);
       Object.keys(actVids).forEach(function (k) {
@@ -1113,7 +1138,11 @@
     }
     machine.style.opacity = String(1 - mOut);
     machine.style.transform = 'scale(' + (1 + mOut * .35) + ') translateX(' + (-mOut * 8) + '%)';
-    var sIn = Math.min(1, (isRF ? sm(p, .33, .39) : sm(p, .42, .5)) * (1 - sm(p, .57, .61)) + sm(p, .74, .78));
+    // v22: cross-section fades out (0.6 s) before the clip fades in; it returns only after the clip has faded out (0.8 s)
+    var now = performance.now(), gate;
+    if (actOn) gate = RM ? 0 : 1 - clamp((now - actOnAt) / (SKIN_OUT * 1000), 0, 1);
+    else gate = RM ? 1 : clamp((now - actOffAt - CLIP_OUT * 1000) / (SKIN_OUT * 1000), 0, 1);
+    var sIn = (p < .66 ? (isRF ? sm(p, .33, .39) : sm(p, .42, .5)) : 1) * gate;
     skin.style.opacity = String(sIn);
     skin.style.transform = 'scale(' + (.92 + sIn * .08) + ')';
 
@@ -1136,11 +1165,15 @@
       wk.style.opacity = String(sm(p, .74, .78) * (1 - sm(p, .86, .89)));
       cellEls.forEach(function (c) { c.setAttribute('r', c.dataset.r); c.style.opacity = 1; });
     } else {
-      warp(sm(p, .42, .50) * (1 - sm(p, .74, .80)));
-      var cd = sm(p, .45, .53) * (1 - .75 * sm(p, .74, .82));
+      // v22: once the cross-section is in, hold 1.5 s, then suction + cooling play automatically (3 s)
+      if (p < .42) csT0 = null;
+      else if (csT0 === null && p >= .46) { csT0 = (p >= .58 || RM) ? -1e9 : performance.now(); animFor(CS_HOLD + CS_RUN + .2); }
+      var ct = csT0 === null ? -1 : (performance.now() - csT0) / 1000 - CS_HOLD;
+      warp(sm(ct, 0, 1.2) * (1 - sm(p, .74, .80)));
+      var cd = sm(ct, .6, 2.2) * (1 - .75 * sm(p, .74, .82));
       cold.setAttribute('opacity', cd.toFixed(3));
       tight.setAttribute('opacity', '0'); loose.setAttribute('opacity', '1');
-      var clr = sm(p, .74, .86), cool = sm(p, .45, .56);
+      var clr = sm(p, .74, .86), cool = sm(ct, .8, CS_RUN);
       cellEls.forEach(function (c) {
         if (c.dataset.z !== '1') return;
         // cells inside the cup cool one by one (frost); cells outside stay gold
