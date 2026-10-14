@@ -4,3 +4,10 @@ https://:project.pages.dev/*
 
 https://:version.:project.pages.dev/*
   X-Robots-Tag: noindex
+
+# v34: keep the old holding page out of search results
+/coming-soon
+  X-Robots-Tag: noindex
+
+/coming-soon/*
+  X-Robots-Tag: noindex
