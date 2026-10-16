@@ -88,12 +88,25 @@ async function sendEnquiry(env, input) {
   return "Sent. B Sculpt has the details and a confirmation email has gone to the visitor.";
 }
 
+// v38: room for the full reply (newer models may spend part of max_tokens on thinking); thinking is turned off,
+// and if a model rejects that setting the call is repeated without it.
+let THINKING_OK = true;
 async function claude(env, messages) {
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
-    body: JSON.stringify({ model: env.CHAT_MODEL || DEFAULT_MODEL, max_tokens: 500, system: SYSTEM, tools: TOOLS, messages }),
-  });
+  const call = async (withThinkingOff) => {
+    const body = { model: env.CHAT_MODEL || DEFAULT_MODEL, max_tokens: 1500, system: SYSTEM, tools: TOOLS, messages };
+    if (withThinkingOff) body.thinking = { type: "disabled" };
+    return fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify(body),
+    });
+  };
+  let res = await call(THINKING_OK);
+  if (!res.ok && THINKING_OK && res.status === 400) {
+    const t = await res.text();
+    if (/thinking/i.test(t)) { THINKING_OK = false; res = await call(false); }
+    else throw new Error("Claude API 400: " + t);
+  }
   if (!res.ok) throw new Error("Claude API " + res.status + ": " + (await res.text()));
   return res.json();
 }
@@ -139,7 +152,11 @@ export async function onRequestPost(context) {
       messages.push({ role: "user", content: results });
       res = await claude(env, messages);
     }
-    const reply = (res.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+    let reply = (res.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+    if (res.stop_reason === "max_tokens") {   // v38: never show a reply cut off mid-sentence
+      const cut = reply.replace(/\[CHOICES:[^\]]*$/i, "").search(/[.!?][^.!?]*$/);
+      reply = (cut > 0 ? reply.slice(0, cut + 1) : reply) + "\nIs there anything else I can help with?\n[CHOICES: Get in touch | Make a booking | That's all for now]";
+    }
     return json({ reply: reply || "Sorry, I didn't catch that. Could you rephrase?", sent }, 200);
   } catch (e) {
     return json({ error: "Assistant unavailable" }, 502);
