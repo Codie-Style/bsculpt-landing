@@ -63,7 +63,9 @@
   .hdr.solid { background: rgba(16,39,31,0.82); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
   .hdr__brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
   .hdr__brand img.m { height: 30px; }
-  .hdr__brand img.w { height: 13px; }
+  .hdr__brand img.w { height: 13px; display: block; }
+  .hdr__word { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }   /* v37 */
+  .hdr__tag { font: 500 .5rem/1 'DM Sans', sans-serif; letter-spacing: .3em; text-transform: uppercase; color: var(--bs-gold); white-space: nowrap; }
   .pill {
     display: inline-flex; align-items: center; gap: .5rem;
     font: 500 0.85rem 'DM Sans', sans-serif; letter-spacing: .02em;
@@ -397,6 +399,12 @@
   .chat__msg.bot { align-self: flex-start; background: rgba(245,239,227,.07); border: 1px solid rgba(245,239,227,.08); border-bottom-left-radius: 6px; }
   .chat__msg.me { align-self: flex-end; background: var(--bs-gold); color: var(--bs-forest); font-weight: 400; border-bottom-right-radius: 6px; }
   .chat__msg a { color: var(--bs-gold); }
+  .chat__btns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }   /* v37 */
+  .chat__btns .chat__book { margin-top: 0; }
+  .chat__book--ghost { background: transparent !important; color: var(--bs-cream) !important; border: 1px solid rgba(200,169,106,.55); cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  .chat__choices { align-self: flex-start; display: flex; flex-wrap: wrap; gap: 6px; max-width: 92%; }
+  .chat__choices button { padding: .5rem .9rem; border-radius: 999px; border: 1px solid rgba(200,169,106,.55); background: rgba(200,169,106,.08); color: var(--bs-cream); font: 400 .8rem 'DM Sans', sans-serif; cursor: pointer; }
+  .chat__choices button:hover { background: rgba(200,169,106,.18); }
   .chat__msg .chat__book { display: inline-block; margin-top: 8px; padding: .5rem .95rem; border-radius: 999px; background: var(--bs-gold); color: var(--bs-forest); text-decoration: none; font-weight: 500; font-size: .8rem; }
   .chat__typing { align-self: flex-start; display: flex; gap: 4px; padding: 12px 14px; }
   .chat__typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--bs-gold); opacity: .4; animation: chatDot 1.2s infinite; }
@@ -597,7 +605,7 @@
 <header class="hdr" id="hdr">
   <a class="hdr__brand" href="#top" aria-label="B Sculpt home">
     <img class="m" src="/assets/mark.png" alt="" />
-    <img class="w" src="/assets/wordmark.png" alt="B Sculpt" />
+    <span class="hdr__word"><img class="w" src="/assets/wordmark.png" alt="B Sculpt" /><span class="hdr__tag">Define Your Shape</span></span>
   </a>
   <button class="pill" type="button" data-contact aria-haspopup="dialog">Contact us</button>
 </header>
@@ -1581,8 +1589,7 @@
   <div class="chat__chips" id="chatChips">
     <button type="button">Tell me about the Warm treatment</button>
     <button type="button">Tell me about the Cold treatment</button>
-    <button type="button">How do I make a booking?</button>
-    <button type="button">How do I cancel a booking?</button>
+    <button type="button">How do I manage bookings?</button>
     <button type="button">Have Sonya contact me</button>
   </div>
   <form class="chat__form" id="chatForm" autocomplete="off">
@@ -1592,38 +1599,71 @@
   </form>
 </section>
 <script>
-/* v33: chat assistant. Conversation is kept in this page only (not stored); each message goes to /chat. */
+/* v33 + v37: chat assistant. Conversation is kept in this page only (not stored); each message goes to /chat.
+   v37: choices as buttons ([CHOICES: a | b | c]), [BOOK] / [WHATSAPP] / [CONTACT] buttons, never a phone number,
+   'How do I manage bookings?' flow, and the closing options handled here (Get in touch / Make a booking / That's all for now). */
 (function () {
   var fab = document.getElementById('chatFab'), box = document.getElementById('chat'), log = document.getElementById('chatLog');
   var form = document.getElementById('chatForm'), input = document.getElementById('chatInput'), send = document.getElementById('chatSend');
   var chips = document.getElementById('chatChips'), hp = form.querySelector('.chat__hp');
   var BOOK = 'https://app.squareup.com/appointments/book/jc1qkom7apjmlp/LMZC8K300EZD8/start';
+  var WA = 'https://wa.me/61459489418';
   var history = [], busy = false, started = false;
-  var GREETING = "Hi, I'm B Sculpt's AI assistant. I can answer questions about our two treatments, help you book a consultation, or pass your details to Sonya. How can I help?";
-  var FALLBACK = "Sorry, I can't reply right now. You can use Contact us at the top of the page, or message us on WhatsApp: https://wa.me/61459489418";
+  var GREETING = "Hi, I'm B Sculpt's AI assistant. I can answer questions about our two treatments, help with bookings, or pass your details to Sonya. How can I help?";
+  var FALLBACK = "Sorry, I can't reply right now. You can use Contact us at the top of the page, or message us on WhatsApp.\n[CONTACT] [WHATSAPP]";
+  // answers the page gives itself (instant, and always the same)
+  var LOCAL = {
+    'how do i manage bookings?': 'Of course. What would you like to do?\n[CHOICES: Make a booking | Reschedule a booking | Cancel a booking]',
+    'make a booking': 'You can book your consultation online, at a time that suits you.\n[BOOK]',
+    'get in touch': 'You can send us a message here on the website, or chat with us on WhatsApp.\n[CONTACT] [WHATSAPP]',
+    "that's all for now": 'Thanks for chatting with us. We hope to see you at B Sculpt soon.'
+  };
 
   function showFab() { fab.classList.toggle('on', window.scrollY > window.innerHeight * 0.6); }
   window.addEventListener('scroll', showFab, { passive: true }); showFab();
 
   function esc(t) { return t.replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  // turns an assistant reply into { html, choices }
   function render(text) {
-    // v35: the booking link is always a button. The assistant adds [BOOK]; any Square address it writes is removed too.
+    var choices = [];
+    text = text.replace(/\[CHOICES:\s*([^\]]+)\]/gi, function (m, list) {
+      list.split('|').forEach(function (c) { c = c.trim(); if (c && choices.length < 5) choices.push(c); }); return '';
+    });
     var SQ = /(?:https?:\/\/)?app\.squareup\.com\/[^\s)]*/gi;
-    var hasBook = /\[BOOK\]/i.test(text) || SQ.test(text);
-    var hadUrl = text.search(SQ) >= 0;
-    text = text.replace(/\s*\[BOOK\]\s*/gi, ' ').replace(SQ, '').replace(/\*\*(.+?)\*\*/g, '$1').replace(/[ \t]+\n/g, '\n').trim();
+    var WAURL = /(?:https?:\/\/)?(?:wa\.me|api\.whatsapp\.com)\/[^\s)]*/gi;
+    var PHONE = /\(?(?:\+?61\s?|0)4\d{2}[\s-]?\d{3}[\s-]?\d{3}\)?|\b61459489418\b/g;
+    var hasBook = /\[BOOK\]/i.test(text) || text.search(SQ) >= 0;
+    var hasWa = /\[WHATSAPP\]/i.test(text) || text.search(WAURL) >= 0;
+    var hasContact = /\[CONTACT\]/i.test(text);
+    var hadUrl = text.search(SQ) >= 0 || text.search(WAURL) >= 0;
+    text = text.replace(/\s*\[(BOOK|WHATSAPP|CONTACT)\]\s*/gi, ' ').replace(SQ, '').replace(WAURL, '')
+               .replace(/\s*\(\s*(?:\+?61\s?|0)4\d{2}[\s-]?\d{3}[\s-]?\d{3}\s*\)/g, '').replace(PHONE, 'WhatsApp')
+               .replace(/\*\*(.+?)\*\*/g, '$1').replace(/[ \t]+\n/g, '\n').replace(/[ \t]{2,}/g, ' ').trim();
     if (hadUrl) text = text.replace(/(^|[.!?]\s+)[^.!?\n]*\b(?:at|here|via|on|from)\s*:?\s*$/i, '$1').trim();   // drop a dangling 'book at'
     var h = esc(text).replace(/(https?:\/\/[^\s)]+[^\s).,])/g, function (u) {
       return '<a href="' + u + '" target="_blank" rel="noopener">' + u.replace(/^https?:\/\//, '') + '</a>';
-    }).replace(/(^|\s)(info@bsculpt\.com\.au)/g, '$1<a href="mailto:$2">$2</a>');
-    if (hasBook) h += (h ? '<br>' : '') + '<a class="chat__book" href="' + BOOK + '" target="_blank" rel="noopener">Book a consultation</a>';
-    return h;
+    }).replace(/(^|\s)((?:info|bookings)@bsculpt\.com\.au)/g, '$1<a href="mailto:$2">$2</a>');
+    var btns = '';
+    if (hasBook) btns += '<a class="chat__book" href="' + BOOK + '" target="_blank" rel="noopener">Book a consultation</a>';
+    if (hasContact) btns += '<button type="button" class="chat__book chat__book--ghost" data-chat-contact>Contact us</button>';
+    if (hasWa) btns += '<a class="chat__book chat__book--ghost" href="' + WA + '" target="_blank" rel="noopener">WhatsApp</a>';
+    if (btns) h += (h ? '<div class="chat__btns">' : '<div class="chat__btns" style="margin-top:0">') + btns + '</div>';
+    return { html: h, choices: choices };
   }
+  function clearChoices() { log.querySelectorAll('.chat__choices').forEach(function (c) { c.remove(); }); }
   function add(role, text) {
     var d = document.createElement('div');
     d.className = 'chat__msg ' + (role === 'user' ? 'me' : 'bot');
-    if (role === 'user') d.textContent = text; else d.innerHTML = render(text);
-    log.appendChild(d); log.scrollTop = log.scrollHeight;
+    if (role === 'user') { d.textContent = text; log.appendChild(d); }
+    else {
+      var r = render(text); d.innerHTML = r.html; log.appendChild(d);
+      if (r.choices.length) {
+        var c = document.createElement('div'); c.className = 'chat__choices';
+        r.choices.forEach(function (t) { var b = document.createElement('button'); b.type = 'button'; b.textContent = t; c.appendChild(b); });
+        log.appendChild(c);
+      }
+    }
+    log.scrollTop = log.scrollHeight;
   }
   function typing(on) {
     var t = log.querySelector('.chat__typing');
@@ -1644,10 +1684,25 @@
   document.getElementById('chatClose').addEventListener('click', close);
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('open')) close(); });
 
-  function ask(text) {
+  function reply(text) {
+    // answers the page knows itself, otherwise the assistant
     text = (text || '').trim().slice(0, 1000);
     if (!text || busy) return;
-    busy = true; send.disabled = true; chips.style.display = 'none';
+    var key = text.toLowerCase().replace(/[’]/g, "'");
+    if (LOCAL[key]) {
+      clearChoices(); chips.style.display = 'none';
+      add('user', text);
+      var a = LOCAL[key];
+      add('assistant', a);
+      history.push({ role: 'user', content: text }, { role: 'assistant', content: a });
+      input.value = ''; input.style.height = '';
+      if (key === "that's all for now") setTimeout(close, 1800);
+      return;
+    }
+    ask(text);
+  }
+  function ask(text) {
+    busy = true; send.disabled = true; chips.style.display = 'none'; clearChoices();
     add('user', text); history.push({ role: 'user', content: text });
     input.value = ''; input.style.height = '';
     typing(true);
@@ -1655,20 +1710,24 @@
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
       .then(function (j) {
         typing(false);
-        var reply = (j && j.reply) || FALLBACK;
-        add('assistant', reply); history.push({ role: 'assistant', content: reply });
+        var a = (j && j.reply) || FALLBACK;
+        add('assistant', a); history.push({ role: 'assistant', content: a });
       })
       .catch(function () { typing(false); add('assistant', FALLBACK); history.pop(); })
       .then(function () { busy = false; send.disabled = false; });
   }
-  form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); });
-  input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(input.value); } });
+  form.addEventListener('submit', function (e) { e.preventDefault(); reply(input.value); });
+  input.addEventListener('keydown', function (e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); reply(input.value); } });
   input.addEventListener('input', function () { input.style.height = ''; input.style.height = Math.min(input.scrollHeight, 110) + 'px'; });
   chips.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
     var t = b.textContent;
     if (t === 'Have Sonya contact me') t = "I'd like Sonya to contact me.";
-    ask(t);
+    reply(t);
+  });
+  log.addEventListener('click', function (e) {
+    var b = e.target.closest('.chat__choices button'); if (b) { reply(b.textContent); return; }
+    if (e.target.closest('[data-chat-contact]')) { close(); var c = document.getElementById('contact'); if (c && c.showModal) c.showModal(); }
   });
 })();
 </script>
