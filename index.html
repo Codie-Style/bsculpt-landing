@@ -1292,6 +1292,10 @@
 </dialog>
 <script>
 (function () {
+  /* v44: always open at the top unless the address names a section (#split etc.) */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  var toTop = function () { if (!location.hash) window.scrollTo(0, 0); };
+  toTop(); window.addEventListener('load', toTop);
   var RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
   var sm = function (v, a, b) { var t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
