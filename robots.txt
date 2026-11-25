@@ -1,4 +1,44 @@
+# B Sculpt (www.bsculpt.com.au) - public website
+# The staff dashboard (app.bsculpt.com.au) is a separate host and is not covered by this file.
+
 User-agent: *
+Allow: /
+
+# Search and AI assistants are welcome to read the public site.
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Applebot
 Allow: /
 
 Sitemap: https://www.bsculpt.com.au/sitemap.xml

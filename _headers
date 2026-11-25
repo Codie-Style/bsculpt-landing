@@ -11,3 +11,7 @@ https://:version.:project.pages.dev/*
 
 /coming-soon/*
   X-Robots-Tag: noindex
+
+# llms.txt: serve as UTF-8 plain text (it contains en dashes)
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
